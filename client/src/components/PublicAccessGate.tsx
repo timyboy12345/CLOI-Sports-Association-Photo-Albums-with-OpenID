@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent, ReactNode } from 'react';
 import api from '../api';
-import { Lock, Loader2 } from 'lucide-react';
+import { Lock, Loader2, ShieldCheck } from 'lucide-react';
 import { isAxiosError } from 'axios';
 
 interface PublicAccessGateProps {
@@ -50,7 +50,7 @@ const PublicAccessGate = ({ children }: PublicAccessGateProps) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <Loader2 className="animate-spin text-red-600" size={32} />
       </div>
     );
@@ -61,32 +61,44 @@ const PublicAccessGate = ({ children }: PublicAccessGateProps) => {
   }
 
   return (
-    <main className="p-4 md:p-8">
-      <div className="max-w-md mx-auto bg-white rounded-2xl border border-gray-200 p-8 space-y-6">
-        <div className="text-center space-y-2">
-          <Lock size={32} className="mx-auto text-red-900" />
-          <h1 className="text-xl font-bold text-gray-900">Website beveiligd</h1>
-          <p className="text-sm text-gray-500">
-            Je moet een geldig ledenwachtwoord opgeven om deze site te bekijken.
-          </p>
+    <main className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white px-4 py-10 md:px-8 md:py-16">
+      <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-3xl items-center justify-center">
+        <div className="w-full rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-12">
+          <div className="mb-8 text-center space-y-3">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-900">
+              <ShieldCheck size={30} />
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-700">Master toegang</p>
+            <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Voer eerst het master wachtwoord in</h1>
+            <p className="text-sm text-gray-600 md:text-base">
+              Zonder master wachtwoord kun je geen albums bekijken. Na deze stap kun je alle albums openen.
+            </p>
+            <p className="text-xs text-gray-500">
+              Dit is niet het album-wachtwoordscherm. Albumwachtwoorden worden pas gevraagd bij het openen van een beveiligd album.
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4">
+            <label className="block text-sm font-medium text-gray-700">Master wachtwoord</label>
+            <div className="relative">
+              <Lock size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-900 transition-all"
+                placeholder="Master wachtwoord"
+                required
+              />
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-700 cursor-pointer"
+            >
+              Toegang tot alle albums
+            </button>
+          </form>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent transition-all"
-            placeholder="Ledenwachtwoord"
-            required
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 cursor-pointer text-white font-semibold py-3 px-6 rounded-xl transition-colors"
-          >
-            Verder
-          </button>
-        </form>
       </div>
     </main>
   );
