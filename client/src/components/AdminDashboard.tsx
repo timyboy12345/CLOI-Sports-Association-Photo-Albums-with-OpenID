@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {useNavigate} from 'react-router-dom';
 import api from '../api';
-import { LogIn, LogOut, Plus, FolderPlus, User as UserIcon, Loader2, Edit, Trash2 } from 'lucide-react';
+import { LogIn, LogOut, Plus, FolderPlus, User as UserIcon, Loader2, Edit, Trash2, Lock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface User {
@@ -12,19 +12,30 @@ interface User {
   last_login?: string;
 }
 
+interface MasterPassword {
+  id: number;
+  name: string;
+  created_at: string;
+}
+
 const AdminDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [albumName, setAlbumName] = useState('');
   const [albums, setAlbums] = useState<{ id: number; name: string; date: string; photo_count?: number }[]>([]);
+  const [masterPasswords, setMasterPasswords] = useState<MasterPassword[]>([]);
+  const [masterPasswordName, setMasterPasswordName] = useState('');
+  const [newMasterPassword, setNewMasterPassword] = useState('');
   const [deletingAlbumId, setDeletingAlbumId] = useState<number | null>(null);
   const [updatingUserId, setUpdatingUserId] = useState<number | null>(null);
+  const [deletingMasterPasswordId, setDeletingMasterPasswordId] = useState<number | null>(null);
 
   useEffect(() => {
     checkAuth();
     fetchAlbums();
     fetchUsers();
+    fetchMasterPasswords();
   }, []);
 
   let navigate = useNavigate();
@@ -61,6 +72,15 @@ const AdminDashboard = () => {
       setUsers(res.data);
     } catch (err) {
       console.error('Failed to fetch users', err);
+    }
+  };
+
+  const fetchMasterPasswords = async () => {
+    try {
+      const res = await api.get('/master-passwords');
+      setMasterPasswords(res.data);
+    } catch (err) {
+      console.error('Failed to fetch master passwords', err);
     }
   };
 
@@ -123,6 +143,31 @@ const AdminDashboard = () => {
       alert(err.response?.data?.error || 'Failed to update user role.');
     } finally {
       setUpdatingUserId(null);
+    }
+  };
+
+  const handleCreateMasterPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post('/master-passwords', { name: masterPasswordName, password: newMasterPassword });
+      setMasterPasswordName('');
+      setNewMasterPassword('');
+      await fetchMasterPasswords();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to add master password.');
+    }
+  };
+
+  const handleDeleteMasterPassword = async (id: number) => {
+    if (!window.confirm('Weet je zeker dat je dit master wachtwoord wilt verwijderen?')) return;
+    setDeletingMasterPasswordId(id);
+    try {
+      await api.delete(`/master-passwords/${id}`);
+      setMasterPasswords((prev) => prev.filter((item) => item.id !== id));
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to delete master password.');
+    } finally {
+      setDeletingMasterPasswordId(null);
     }
   };
 
@@ -327,6 +372,64 @@ const AdminDashboard = () => {
               )}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section className="bg-white p-4 md:p-8 rounded-2xl border border-gray-200 space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-red-50 text-red-900 rounded-lg">
+            <Lock size={24} />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">Master Wachtwoorden</h2>
+        </div>
+
+        <form onSubmit={handleCreateMasterPassword} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input
+            type="text"
+            value={masterPasswordName}
+            onChange={(e) => setMasterPasswordName(e.target.value)}
+            placeholder="Naam (bijv. Seizoen 2026)"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent transition-all"
+            required
+          />
+          <input
+            type="password"
+            value={newMasterPassword}
+            onChange={(e) => setNewMasterPassword(e.target.value)}
+            placeholder="Nieuw master wachtwoord"
+            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent transition-all"
+            required
+          />
+          <button
+            type="submit"
+            className="w-full flex items-center justify-center gap-2 cursor-pointer bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors"
+          >
+            <Plus size={20} />
+            Toevoegen
+          </button>
+        </form>
+
+        <div className="space-y-2">
+          {masterPasswords.map((item) => (
+            <div key={item.id} className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50 p-4">
+              <div>
+                <p className="font-semibold text-gray-900">{item.name}</p>
+                <p className="text-xs text-gray-500">Aangemaakt: {new Date(item.created_at).toLocaleString()}</p>
+              </div>
+              <button
+                type="button"
+                disabled={deletingMasterPasswordId === item.id}
+                onClick={() => handleDeleteMasterPassword(item.id)}
+                className="p-2 rounded-lg cursor-pointer text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:text-gray-300"
+                title="Verwijder master wachtwoord"
+              >
+                {deletingMasterPasswordId === item.id ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+              </button>
+            </div>
+          ))}
+          {masterPasswords.length === 0 && (
+            <p className="text-gray-400 italic">Nog geen master wachtwoorden ingesteld.</p>
+          )}
         </div>
       </section>
     </div>

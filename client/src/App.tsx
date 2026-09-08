@@ -6,6 +6,7 @@ import PhotoGallery from './components/PhotoGallery';
 import AdminDashboard from './components/AdminDashboard';
 import EditAlbum from './components/EditAlbum';
 import Sidebar from './components/Sidebar';
+import PublicAccessGate from './components/PublicAccessGate';
 import './index.css';
 
 function App() {
@@ -29,16 +30,18 @@ function App() {
               <span className="font-semibold">Menu</span>
             </button>
           </header>
-          <main className="p-4 md:p-8">
-            <div className="max-w-6xl mx-auto">
-              <Routes>
-                <Route path="/" element={<AlbumList />} />
-                <Route path="/album/:id" element={<PhotoGallery />} />
-                <Route path="/admin" element={<AdminDashboard />} />
-                <Route path="/admin/edit/:id" element={<EditAlbum />} />
-              </Routes>
-            </div>
-          </main>
+          <PublicAccessGate>
+            <main className="p-4 md:p-8">
+              <div className="max-w-6xl mx-auto">
+                <Routes>
+                  <Route path="/" element={<AlbumList />} />
+                  <Route path="/album/:id" element={<PhotoGallery />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/edit/:id" element={<EditAlbum />} />
+                </Routes>
+              </div>
+            </main>
+          </PublicAccessGate>
         </div>
       </div>
     </Router>
