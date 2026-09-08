@@ -65,8 +65,10 @@ const PublicAccessGate = ({ children }: PublicAccessGateProps) => {
       <div className="max-w-md mx-auto bg-white rounded-2xl border border-gray-200 p-8 space-y-6">
         <div className="text-center space-y-2">
           <Lock size={32} className="mx-auto text-red-900" />
-          <h1 className="text-xl font-bold text-gray-900">Voer master wachtwoord in</h1>
-          <p className="text-sm text-gray-500">Je moet een geldig master wachtwoord opgeven om deze site te bekijken.</p>
+          <h1 className="text-xl font-bold text-gray-900">Website beveiligd</h1>
+          <p className="text-sm text-gray-500">
+            Je moet een geldig ledenwachtwoord opgeven om deze site te bekijken.
+          </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -74,7 +76,7 @@ const PublicAccessGate = ({ children }: PublicAccessGateProps) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent transition-all"
-            placeholder="Master wachtwoord"
+            placeholder="Ledenwachtwoord"
             required
           />
           {error && <p className="text-sm text-red-600">{error}</p>}

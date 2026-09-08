@@ -159,7 +159,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteMasterPassword = async (id: number) => {
-    if (!window.confirm('Weet je zeker dat je dit master wachtwoord wilt verwijderen?')) return;
+    if (!window.confirm('Weet je zeker dat je dit ledenwachtwoord wilt verwijderen?')) return;
     setDeletingMasterPasswordId(id);
     try {
       await api.delete(`/master-passwords/${id}`);
@@ -380,7 +380,7 @@ const AdminDashboard = () => {
           <div className="p-2 bg-red-50 text-red-900 rounded-lg">
             <Lock size={24} />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Master Wachtwoorden</h2>
+          <h2 className="text-xl font-bold text-gray-900">Ledenwachtwoorden</h2>
         </div>
 
         <form onSubmit={handleCreateMasterPassword} className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -396,7 +396,7 @@ const AdminDashboard = () => {
             type="password"
             value={newMasterPassword}
             onChange={(e) => setNewMasterPassword(e.target.value)}
-            placeholder="Nieuw master wachtwoord"
+            placeholder="Nieuw ledenwachtwoord"
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent transition-all"
             required
           />
@@ -428,7 +428,7 @@ const AdminDashboard = () => {
             </div>
           ))}
           {masterPasswords.length === 0 && (
-            <p className="text-gray-400 italic">Nog geen master wachtwoorden ingesteld.</p>
+            <p className="text-gray-400 italic">Nog geen master wachtwoorden ingesteld, de website is nu voor iedereen bereikbaar op het hele internet.</p>
           )}
         </div>
       </section>

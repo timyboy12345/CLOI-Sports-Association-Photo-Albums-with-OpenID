@@ -122,7 +122,7 @@ const PhotoGallery = () => {
         <div className="text-center space-y-2">
           <Lock size={32} className="mx-auto text-red-900" />
           <h1 className="text-xl font-bold text-gray-900">Dit album is beveiligd</h1>
-          <p className="text-sm text-gray-500">Voer het album wachtwoord in om verder te gaan.</p>
+          <p className="text-sm text-gray-500">Voer de toegangscode in om verder te gaan.</p>
         </div>
         <form onSubmit={handlePasswordSubmit} className="space-y-4">
           <input
@@ -130,7 +130,7 @@ const PhotoGallery = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-900 focus:border-transparent transition-all"
-            placeholder="Wachtwoord"
+            placeholder="Toegangscode"
             required
           />
           {passwordError && <p className="text-sm text-red-600">{passwordError}</p>}
@@ -262,7 +262,7 @@ const PhotoGallery = () => {
                                       <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
                                           <div className="text-white/50 text-xs">Afmetingen</div>
                                           <div className="text-right font-medium text-xs">{meta.width} × {meta.height} px</div>
-                                          
+
                                           <div className="text-white/50 text-xs">Formaat</div>
                                           <div className="text-right font-medium uppercase text-xs">{meta.format}</div>
 
