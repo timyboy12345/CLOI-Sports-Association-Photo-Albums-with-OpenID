@@ -311,7 +311,7 @@ app.post('/api/public-access/verify', albumAccessRateLimit, (req, res) => {
   res.json({ success: true });
 });
 
-app.get('/api/master-passwords', isAuthenticated, (req, res) => {
+app.get('/api/master-passwords', isAuthenticated, albumAccessRateLimit, (req, res) => {
   const passwords = db
     .prepare('SELECT id, name, created_at FROM master_passwords ORDER BY created_at DESC')
     .all();
