@@ -1,4 +1,5 @@
-import { FormEvent, ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { FormEvent, ReactNode } from 'react';
 import api from '../api';
 import { Lock, Loader2 } from 'lucide-react';
 import { isAxiosError } from 'axios';
