@@ -125,7 +125,6 @@ const processAllPhotosInBackground = () => {
 
 app.use(cors({origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true}));
 app.use(express.json());
-app.use('/api/uploads', requirePublicAccess, express.static(uploadsDir));
 
 // Session config
 app.use(session({
@@ -134,6 +133,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false } // Set to true if using https
 }));
+app.use('/api/uploads', requirePublicAccess, express.static(uploadsDir));
 
 // Placeholder OIDC Config (Should be moved to .env)
 const OIDC_ISSUER = process.env.OIDC_ISSUER || 'https://accounts.google.com';
@@ -186,9 +186,11 @@ function hasMasterPasswords() {
 }
 
 function hasPublicAccess(req: express.Request) {
-  const user = (req.session as any).user;
+  const sessionData = req.session as any;
+  if (!sessionData) return false;
+  const user = sessionData.user;
   if (user) return true;
-  return Boolean((req.session as any).publicAccessGranted);
+  return Boolean(sessionData.publicAccessGranted);
 }
 
 function requirePublicAccess(req: express.Request, res: express.Response, next: express.NextFunction) {
