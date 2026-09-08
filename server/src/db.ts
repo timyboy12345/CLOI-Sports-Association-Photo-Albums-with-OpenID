@@ -27,6 +27,13 @@ db.exec(`
     role TEXT DEFAULT 'guest',
     last_login DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS master_passwords (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    password_hash TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
 
 const albumColumns = db.prepare(`PRAGMA table_info(albums)`).all() as { name: string }[];

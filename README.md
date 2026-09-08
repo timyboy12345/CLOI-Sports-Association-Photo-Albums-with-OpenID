@@ -51,6 +51,7 @@ Microsoft 365 account linked to their organization, a Google login, GitHub, or a
 
 Once authenticated, users can create and edit albums.
 Albums can optionally be protected with an album password from the admin edit page; visitors then need to provide that password (also supported via `?pass=...` in the album URL).
+Admins can also manage site-wide master passwords; when at least one master password exists, unauthenticated visitors must enter a valid one before loading albums or photos.
 
 ![admin.png](wiki/admin.png)
 ![album-edit.png](wiki/album-edit.png)

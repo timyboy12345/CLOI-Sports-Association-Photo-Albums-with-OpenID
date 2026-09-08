@@ -35,7 +35,7 @@ const AlbumList = () => {
 
     return (
         <div className="space-y-12">
-            <div className="flex justify-between items-center border-b border-gray-200 pb-4">
+            <div className="flex justify-between items-center pb-4">
                 <h1 className="text-3xl font-bold text-gray-900">Fotoalbums</h1>
             </div>
 

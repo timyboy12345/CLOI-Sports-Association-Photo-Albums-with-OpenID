@@ -316,7 +316,7 @@ const EditAlbum = () => {
                                     </div>
                                 </div>
                                 <div className="space-y-2 md:col-span-2">
-                                    <label className="text-sm font-medium text-gray-700">Album wachtwoord</label>
+                                    <label className="text-sm font-medium text-gray-700">Toegangscode</label>
                                     <input
                                         type="password"
                                         value={albumPassword}

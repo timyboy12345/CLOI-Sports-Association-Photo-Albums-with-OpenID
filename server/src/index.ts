@@ -125,7 +125,6 @@ const processAllPhotosInBackground = () => {
 
 app.use(cors({origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true}));
 app.use(express.json());
-app.use('/api/uploads', express.static(uploadsDir));
 
 // Session config
 app.use(session({
@@ -134,6 +133,7 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: false } // Set to true if using https
 }));
+app.use('/api/uploads', requirePublicAccess, express.static(uploadsDir));
 
 // Placeholder OIDC Config (Should be moved to .env)
 const OIDC_ISSUER = process.env.OIDC_ISSUER || 'https://accounts.google.com';
@@ -171,7 +171,7 @@ const hashAlbumPassword = (password: string) => {
   return `${salt}:${hash}`;
 };
 
-const verifyAlbumPassword = (password: string, storedHash: string) => {
+const verifyHashedPassword = (password: string, storedHash: string) => {
   const [salt, hashHex] = storedHash.split(':');
   if (!salt || !hashHex) return false;
 
@@ -179,6 +179,25 @@ const verifyAlbumPassword = (password: string, storedHash: string) => {
   const suppliedBuffer = crypto.scryptSync(password, salt, storedBuffer.length);
   return crypto.timingSafeEqual(storedBuffer, suppliedBuffer);
 };
+
+function hasMasterPasswords() {
+  const result = db.prepare('SELECT COUNT(*) as count FROM master_passwords').get() as { count: number };
+  return result.count > 0;
+}
+
+function hasPublicAccess(req: express.Request) {
+  const sessionData = req.session as any;
+  if (!sessionData) return false;
+  const user = sessionData.user;
+  if (user) return true;
+  return Boolean(sessionData.publicAccessGranted);
+}
+
+function requirePublicAccess(req: express.Request, res: express.Response, next: express.NextFunction) {
+  if (!hasMasterPasswords()) return next();
+  if (hasPublicAccess(req)) return next();
+  return res.status(401).json({ error: 'Master password required', requiresMasterPassword: true });
+}
 
 // Auth Middleware
 const isAuthenticated = (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -267,6 +286,61 @@ app.get('/api/users', isAuthenticated, (req, res) => {
   res.json(users);
 });
 
+app.get('/api/public-access/status', (req, res) => {
+  const requiresMasterPassword = hasMasterPasswords();
+  const user = (req.session as any).user;
+  const hasAccess = !requiresMasterPassword || Boolean(user) || Boolean((req.session as any).publicAccessGranted);
+  res.json({ requiresMasterPassword, hasAccess });
+});
+
+app.post('/api/public-access/verify', albumAccessRateLimit, (req, res) => {
+  const { password } = req.body as { password?: string };
+  if (typeof password !== 'string' || !password.trim()) {
+    return res.status(400).json({ error: 'Password is required' });
+  }
+
+  const rows = db.prepare('SELECT password_hash FROM master_passwords').all() as { password_hash: string }[];
+  if (rows.length === 0) {
+    return res.json({ success: true, requiresMasterPassword: false });
+  }
+
+  const isValid = rows.some((row) => verifyHashedPassword(password, row.password_hash));
+  if (!isValid) {
+    return res.status(403).json({ error: 'Invalid master password', requiresMasterPassword: true });
+  }
+
+  (req.session as any).publicAccessGranted = true;
+  res.json({ success: true });
+});
+
+app.get('/api/master-passwords', isAuthenticated, albumAccessRateLimit, (req, res) => {
+  const passwords = db
+    .prepare('SELECT id, name, created_at FROM master_passwords ORDER BY created_at DESC')
+    .all();
+  res.json(passwords);
+});
+
+app.post('/api/master-passwords', isAuthenticated, mutationRateLimit, (req, res) => {
+  const { name, password } = req.body as { name?: string; password?: string };
+  if (typeof name !== 'string' || !name.trim()) {
+    return res.status(400).json({ error: 'Name is required' });
+  }
+
+  if (typeof password !== 'string' || !password.trim()) {
+    return res.status(400).json({ error: 'Password is required' });
+  }
+
+  const info = db
+    .prepare('INSERT INTO master_passwords (name, password_hash) VALUES (?, ?)')
+    .run(name.trim(), hashAlbumPassword(password));
+  res.json({ id: info.lastInsertRowid, name: name.trim() });
+});
+
+app.delete('/api/master-passwords/:id', isAuthenticated, mutationRateLimit, (req, res) => {
+  db.prepare('DELETE FROM master_passwords WHERE id = ?').run(req.params.id);
+  res.json({ success: true });
+});
+
 app.patch('/api/users/:id/role', isAuthenticated, mutationRateLimit, (req, res) => {
   const { role } = req.body;
   if (!['admin', 'guest'].includes(role)) {
@@ -291,6 +365,10 @@ app.patch('/api/users/:id/role', isAuthenticated, mutationRateLimit, (req, res) 
 
 // --- Gallery Routes ---
 app.get('/api/albums', (req, res) => {
+  if (!hasPublicAccess(req) && hasMasterPasswords()) {
+    return res.status(401).json({ error: 'Master password required', requiresMasterPassword: true });
+  }
+
   const albums = db.prepare(`
     SELECT a.id, a.name, a.date,
       CASE WHEN a.password_hash IS NULL OR a.password_hash = '' THEN 0 ELSE 1 END as has_password,
@@ -303,6 +381,10 @@ app.get('/api/albums', (req, res) => {
 });
 
 app.get('/api/albums/:id', albumAccessRateLimit, (req, res) => {
+  if (!hasPublicAccess(req) && hasMasterPasswords()) {
+    return res.status(401).json({ error: 'Master password required', requiresMasterPassword: true });
+  }
+
   const album = db.prepare(`
     SELECT *,
       CASE WHEN password_hash IS NULL OR password_hash = '' THEN 0 ELSE 1 END as has_password
@@ -317,7 +399,7 @@ app.get('/api/albums/:id', albumAccessRateLimit, (req, res) => {
   const requiresPassword = Boolean(album.password_hash);
   if (requiresPassword && !user) {
     const pass = typeof req.query.pass === 'string' ? req.query.pass : '';
-    if (!pass || !verifyAlbumPassword(pass, album.password_hash)) {
+    if (!pass || !verifyHashedPassword(pass, album.password_hash)) {
       return res.status(403).json({ error: 'Album is password protected', requiresPassword: true });
     }
   }
