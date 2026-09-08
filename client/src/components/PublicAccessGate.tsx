@@ -61,24 +61,20 @@ const PublicAccessGate = ({ children }: PublicAccessGateProps) => {
   }
 
   return (
-    <main className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white px-4 py-10 md:px-8 md:py-16">
+    <main className="min-h-screen w-full px-4 py-10">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-3xl items-center justify-center">
-        <div className="w-full rounded-3xl border border-gray-200 bg-white p-8 shadow-sm md:p-12">
+        <div className="w-full rounded-3xl border border-gray-200 bg-white p-8 md:p-12">
           <div className="mb-8 text-center space-y-3">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-900">
               <ShieldCheck size={30} />
             </div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-red-700">Master toegang</p>
-            <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Voer eerst het master wachtwoord in</h1>
-            <p className="text-sm text-gray-600 md:text-base">
-              Zonder master wachtwoord kun je geen albums bekijken. Na deze stap kun je alle albums openen.
-            </p>
+            <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Voer je ledenwachtwoord in</h1>
             <p className="text-xs text-gray-500">
-              Dit is niet het album-wachtwoordscherm. Albumwachtwoorden worden pas gevraagd bij het openen van een beveiligd album.
+              Ledenwachtwoorden staan los van toegangscodes voor losse albums, weet je jouw ledenwachtwoord niet meer, of heb je er nog geen gekregen? Neem contact op met de beheerder.
             </p>
           </div>
           <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-4">
-            <label className="block text-sm font-medium text-gray-700">Master wachtwoord</label>
+            <label className="block text-sm font-medium text-gray-700">Ledenwachtwoord</label>
             <div className="relative">
               <Lock size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -86,7 +82,7 @@ const PublicAccessGate = ({ children }: PublicAccessGateProps) => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full rounded-xl border border-gray-200 py-3 pl-11 pr-4 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-900 transition-all"
-                placeholder="Master wachtwoord"
+                placeholder="Voer hier je ledenwachtwoord in"
                 required
               />
             </div>
@@ -95,7 +91,7 @@ const PublicAccessGate = ({ children }: PublicAccessGateProps) => {
               type="submit"
               className="w-full rounded-xl bg-red-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-red-700 cursor-pointer"
             >
-              Toegang tot alle albums
+              Inloggen
             </button>
           </form>
         </div>
