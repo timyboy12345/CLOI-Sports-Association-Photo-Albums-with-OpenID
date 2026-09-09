@@ -4,8 +4,10 @@ services:
     ports:
       - "5173:80"
     restart: always
-    environment:
+    env_file:
       - ./client/.env
+    depends_on:
+      - server
 
   server:
     build: ./server
@@ -15,7 +17,7 @@ services:
       - sqlite_data:/data
       - uploads:/data/uploads
     restart: always
-    environment:
+    env_file:
       - ./server/.env
 
 volumes:
