@@ -1,0 +1,23 @@
+services:
+  server:
+    image: ghcr.io/timyboy12345/cloi-server:latest
+    restart: always
+    env_file:
+      - ./server/.env
+    volumes:
+      - sqlite_data:/data
+      - uploads:/data/uploads
+
+  client:
+    image: ghcr.io/timyboy12345/cloi-client:latest
+    restart: always
+    env_file:
+      - ./client/.env
+    depends_on:
+      - server
+    ports:
+      - "80:80"
+
+volumes:
+  sqlite_data:
+  uploads:

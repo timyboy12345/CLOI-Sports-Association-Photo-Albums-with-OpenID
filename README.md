@@ -16,7 +16,7 @@ on the home page, and users can select an album to view.
 - Thumbnail generation for fast image viewing
 - One central library, not multiple libraries for different users
 
-## Setting up
+## Local setup (build from source)
 
 The project consists of two files, a `./server` folder, and a `./client` folder. The server folder consists of a Node.js
 Express server that serves as the back-end, while the frontend is built in React using Vite. Images are stored on the
@@ -43,6 +43,80 @@ VITE_CLIENT_PORT=5173
 VITE_CLIENT_URL=https://123.com
 VITE_SERVER_URL=https://123.com
 ```
+
+Run locally from the repository root:
+
+```bash
+docker compose up --build -d
+```
+
+## Production deployment (prebuilt images)
+
+Every push to `main` now triggers `.github/workflows/docker-publish.yml`, which builds and publishes:
+
+- `ghcr.io/timyboy12345/cloi-server:latest`
+- `ghcr.io/timyboy12345/cloi-client:latest`
+
+### 1) Prepare your server once
+
+Install Docker and Docker Compose plugin, then create a deployment folder on your server:
+
+```bash
+mkdir -p /opt/cloi/{server,client}
+cd /opt/cloi
+```
+
+Copy `docker-compose.prod.yml` from this repository into `/opt/cloi/docker-compose.yml`.
+
+Create env files:
+
+```bash
+# /opt/cloi/server/.env
+SERVER_URL=https://photos.your-domain.com
+CLIENT_URL=https://photos.your-domain.com
+SERVER_PORT=3001
+SESSION_SECRET=replace-with-a-long-random-secret
+OIDC_ISSUER=https://login.microsoftonline.com/[TENANT]/v2.0
+OIDC_CLIENT_ID=XXX
+OIDC_CLIENT_SECRET=XXX
+DB_PATH=/data/photos.db
+UPLOADS_PATH=/data/uploads
+
+# /opt/cloi/client/.env
+VITE_CLIENT_PORT=5173
+VITE_CLIENT_URL=https://photos.your-domain.com
+VITE_SERVER_URL=https://photos.your-domain.com
+```
+
+Authenticate Docker to GHCR (required for private package access):
+
+```bash
+echo "<GITHUB_PAT_WITH_read:packages>" | docker login ghcr.io -u <github-username> --password-stdin
+```
+
+### 2) Deploy or update instantly
+
+From `/opt/cloi` run:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+That pulls the latest images built from `main` and restarts containers with the new version.
+
+### 3) Optional one-command update helper
+
+```bash
+#!/usr/bin/env bash
+set -e
+cd /opt/cloi
+docker compose pull
+docker compose up -d
+docker image prune -f
+```
+
+Save as `/opt/cloi/update.sh`, `chmod +x /opt/cloi/update.sh`, then run it whenever you want to deploy the latest push.
 
 ## Authentication
 
