@@ -85,8 +85,8 @@ const AdminDashboard = () => {
   };
 
   const handleLogin = () => {
-    const API_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
-    window.location.href = `${API_URL}/api/auth/login`;
+    const API_URL = import.meta.env.VITE_SERVER_URL;
+    window.location.href = API_URL ? `${API_URL}/api/auth/login` : '/api/auth/login';
   };
 
   const handleLogout = async () => {

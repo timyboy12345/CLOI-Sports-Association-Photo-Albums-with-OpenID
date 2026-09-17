@@ -11,8 +11,6 @@ services:
   client:
     image: ghcr.io/timyboy12345/cloi-client:latest
     restart: always
-    env_file:
-      - ./client/.env
     depends_on:
       - server
     ports:

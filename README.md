@@ -21,8 +21,8 @@ on the home page, and users can select an album to view.
 The project consists of two files, a `./server` folder, and a `./client` folder. The server folder consists of a Node.js
 Express server that serves as the back-end, while the frontend is built in React using Vite. Images are stored on the
 server the back-end is placed on, in a folder named after the album the picture is uploaded in. The project has a
-`docker-compose.yml`, and each project has its own `Dockerfile`. Both the `server` and `client` folder need their own
-`.env` file, filled with the values below.
+`docker-compose.yml`, and each project has its own `Dockerfile`. You only need a `server/.env` file, filled with the
+values below.
 
 ```
 # server/.env
@@ -37,11 +37,6 @@ OIDC_CLIENT_SECRET="XXX"
 DB_PATH="/data/photos.db"
 UPLOADS_PATH="/data/uploads"
 
-# client/.env
-
-VITE_CLIENT_PORT=5173
-VITE_CLIENT_URL=https://123.com
-VITE_SERVER_URL=https://123.com
 ```
 
 Run locally from the repository root:
@@ -62,13 +57,13 @@ Every push to `main` now triggers `.github/workflows/docker-publish.yml`, which 
 Install Docker and Docker Compose plugin, then create a deployment folder on your server:
 
 ```bash
-mkdir -p /opt/cloi/{server,client}
+mkdir -p /opt/cloi/server
 cd /opt/cloi
 ```
 
 Copy `docker-compose.prod.yml` from this repository into `/opt/cloi/docker-compose.yml`.
 
-Create env files:
+Create env file:
 
 ```bash
 # /opt/cloi/server/.env
@@ -82,10 +77,6 @@ OIDC_CLIENT_SECRET=XXX
 DB_PATH=/data/photos.db
 UPLOADS_PATH=/data/uploads
 
-# /opt/cloi/client/.env
-VITE_CLIENT_PORT=5173
-VITE_CLIENT_URL=https://photos.your-domain.com
-VITE_SERVER_URL=https://photos.your-domain.com
 ```
 
 Authenticate Docker to GHCR (required for private package access):

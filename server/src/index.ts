@@ -15,7 +15,7 @@ import { Issuer, Strategy, Client } from 'openid-client';
 import db from './db';
 
 const app = express();
-const port: string = process.env.PORT || '3001';
+const port: string = process.env.PORT || process.env.SERVER_PORT || '3001';
 
 // Ensure uploads directory exists
 const uploadsDir = process.env.UPLOADS_PATH || path.join(__dirname, '../uploads');
